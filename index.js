@@ -6,7 +6,7 @@ const db = mysql.createConnection({
   // MySQL username,
   user: "root",
   // MySQL password
-  password: "",
+  password: "3nterPr!se96",
   database: "employees_db",
 });
 
@@ -139,18 +139,25 @@ function addRole() {
                     'Sales',
                     'Human Resources',
                     'Accounting',
-                    'Intern'
+                    'CS Agent'
                 ]
             }
         ])
         .then((answers) => {
             console.log(answers)
-            const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
-            const params = [answers.roleName, answers.roleSalary, answers.roleChoice];
-            db.query(sql, params, (err, rows) => {
+            let deptId;
+            db.query(`SELECT id FROM departments WHERE departments.department = '${answers.roleChoice}'`, (err, rows) => {
                 if (err) {
                     console.log(err)
                 }
+                deptId = rows[0].id;
+                const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`
+                const params = [answers.roleName, answers.roleSalary, deptId];
+                db.query(sql, params, (err, rows) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                })
             })
         })
         .catch((error) => {
@@ -202,14 +209,23 @@ function addEmployee() {
         ])
         .then((answers) => {
             console.log(answers);
+            db.query(`SELECT role_id, manager_id FROM employees WHERE employees.role_id = '${answers.employeeRole}', employees.manager_id = '${answers.employeeManager}'`, (err, rows) => {
+            if (err) {
+                console.log(err)
+            }
+            let roleId;
+            let managerId;
+            roleId = rows[0].role_id;
+            managerId = rows[0].managerId;
             const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-            const params = [answers.firstName, answers.lastName, answers.employeeRole, answers.employeeManager];
+            const params = [answers.firstName, answers.lastName, roleId, managerId];
             db.query(sql, params, (err, rows) => {
                 if (err) {
                     console.log(err)
                 }
             })
-        })
+            })
+            })
         .catch((err) => {
             console.log(err)
         })
