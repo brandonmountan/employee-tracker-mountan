@@ -6,7 +6,7 @@ const db = mysql.createConnection({
   // MySQL username,
   user: "root",
   // MySQL password
-  password: "",
+  password: "3nterPr!se96",
   database: "employees_db",
 });
 
@@ -63,118 +63,161 @@ function loadMainPrompt() {
 }
 
 function viewAllDepartments() {
-    console.log('viewAllDepartments');
-    db.query('SELECT * FROM department', (err, rows) => {
-        console.table(rows)
+    db.query('SELECT * FROM departments', (err, rows) => {
+        console.table(rows);
+        loadMainPrompt();
     })
-    loadMainPrompt()
 }
 
 function viewAllRoles() {
-    console.log('viewAllRoles');
-    db.query('SELECT role.id, role.title, role.salary, department.name FROM role JOIN department ON role.department_id=department.id;', (err, rows) => {
-        console.table(rows)
+    db.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles JOIN departments ON roles.department_id=departments.id;', (err, rows) => {
+        console.table(rows);
+        loadMainPrompt();
     })
-    loadMainPrompt()
 }
 
 function viewAllEmployees() {
-    console.log('viewAllEmployees');
-    db.query('SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id FROM employee ON JOIN role JOIN department;', (err, rows) => {
+    db.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, employees.manager_id, manager.first_name FROM employees JOIN roles ON employees.role_id=roles.id JOIN departments ON roles.department_id=departments.id JOIN employees manager ON employees.id=manager.id', (err, rows) => {
         if (err) {
             console.log(err)
         }
-        console.table(rows)
+        console.table(rows);
+        loadMainPrompt();
     })
-    loadMainPrompt()
 }
 
-function loadDeptPrompt() {
-    inquirer
-    .prompt([
-        {
-            type: 'input',
-            name: 'departmentName',
-            message: 'Please enter department name',
-        }
-    ])
-    .then((answer) => {
-        console.log(answer.departmentName);
-        db.query(`INSERT INTO department (name) VALUES (${answer.departmentName});`, (err, rows) => {
-            if (err) {
-                console.log(err)
-            }
-        })
-    })
-    .catch((error) => {
-        console.log(error)
-    })
-}
+
 
 function addDepartment() {
     console.log('addDepartment');
+    function loadDeptPrompt() {
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'departmentName',
+                message: 'Please enter department name',
+            }
+        ])
+        .then((answer) => {
+            console.log(answer.departmentName);
+            const sql = `INSERT INTO departments (department) VALUES (?);`
+            db.query(sql, answer.departmentName, (err, rows) => {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    }
     loadDeptPrompt();
     // loadMainPrompt();
 }
 
 
-function loadRolePrompt() {
-    inquirer
-    .prompt([
-        {
-            type: 'input',
-            name: 'roleName',
-            message: 'What is the name of the role?'
-        },
-        {
-            type: 'input',
-            name: 'roleSalary',
-            message: 'What is the salary of the role?'
-        },
-        {
-            type: 'list',
-            name: 'roleChoice',
-            message: 'Which department does the role belong to?',
-            choices: [
-                'Math',
-                'English',
-                'Science',
-                'History'
-            ]
-        }
-    ])
-};
 
 function addRole() {
     console.log('addRole');
+    function loadRolePrompt() {
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'roleName',
+                message: 'What is the name of the role?'
+            },
+            {
+                type: 'input',
+                name: 'roleSalary',
+                message: 'What is the salary of the role?'
+            },
+            {
+                type: 'list',
+                name: 'roleChoice',
+                message: 'Which department does the role belong to?',
+                choices: [
+                    'Math',
+                    'English',
+                    'Science',
+                    'History'
+                ]
+            }
+        ])
+        .then((answers) => {
+            console.log(answers)
+            const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+            const params = [answers.roleName, answers.roleSalary, answers.roleChoice];
+            db.query(sql, params, (err, rows) => {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+    };
+    
     loadRolePrompt();
     // loadMainPrompt();
 }
 
-function loadEmployeePrompt() {
-    inquirer
-    .prompt([
-        {
-            type: 'input',
-            name: 'firstName',
-            message: "What is the employee's first name?"
-        },
-        {
-            type: 'input',
-            name: 'lastName',
-            message: "What is the employee's last name?"
-        },
-        {
-            type: 'list',
-            name: 'employeeRole',
-            message: "What is the employee's role?"
-        }
-    ])
-}
+
 
 function addEmployee() {
     console.log('addEmployee');
-    loadMainPrompt();
+    function loadEmployeePrompt() {
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'firstName',
+                message: "What is the employee's first name?"
+            },
+            {
+                type: 'input',
+                name: 'lastName',
+                message: "What is the employee's last name?"
+            },
+            {
+                type: 'list',
+                name: 'employeeRole',
+                message: "What is the employee's role?",
+                choices: [
+                    'Professor',
+                    'Researcher',
+                    'Administrator',
+                    'Associate Professor'
+                ]
+            },
+            {
+                type: 'list',
+                name: 'employeeManager',
+                message: "Who is the employee's manager?",
+                choices: [
+                    'John Doe',
+                    'Jane Doe'
+                ]
+            }
+        ])
+        .then((answers) => {
+            console.log(answers);
+            const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+            const params = [answers.firstName, answers.lastName, answers.employeeRole, answers.employeeManager];
+            db.query(sql, params, (err, rows) => {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    }
+    loadEmployeePrompt();
+    // loadMainPrompt();
 }
 
 function quit() {
