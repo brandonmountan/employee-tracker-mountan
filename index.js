@@ -6,7 +6,7 @@ const db = mysql.createConnection({
   // MySQL username,
   user: "root",
   // MySQL password
-  password: "3nterPr!se96",
+  password: "",
   database: "employees_db",
 });
 
@@ -86,8 +86,6 @@ function viewAllEmployees() {
     })
 }
 
-
-
 function addDepartment() {
     console.log('addDepartment');
     function loadDeptPrompt() {
@@ -138,10 +136,10 @@ function addRole() {
                 name: 'roleChoice',
                 message: 'Which department does the role belong to?',
                 choices: [
-                    'Math',
-                    'English',
-                    'Science',
-                    'History'
+                    'Sales',
+                    'Human Resources',
+                    'Accounting',
+                    'Intern'
                 ]
             }
         ])
@@ -186,10 +184,10 @@ function addEmployee() {
                 name: 'employeeRole',
                 message: "What is the employee's role?",
                 choices: [
-                    'Professor',
-                    'Researcher',
-                    'Administrator',
-                    'Associate Professor'
+                    'Salesman',
+                    'HR Representative',
+                    'Accountant',
+                    'Student'
                 ]
             },
             {
