@@ -6,7 +6,7 @@ const db = mysql.createConnection({
   // MySQL username,
   user: "root",
   // MySQL password
-  password: "3nterPr!se96",
+  password: "",
   database: "employees_db",
 });
 
@@ -209,10 +209,11 @@ function addEmployee() {
         ])
         .then((answers) => {
             console.log(answers);
-            db.query(`SELECT role_id, manager_id FROM employees WHERE employees.role_id = '${answers.employeeRole}', employees.manager_id = '${answers.employeeManager}'`, (err, rows) => {
+            db.query(`SELECT role_id, manager_id FROM employees WHERE employees.role_id = '${answers.employeeRole}' AND employees.manager_id = '${answers.employeeManager}'`, (err, rows) => {
             if (err) {
                 console.log(err)
             }
+            console.log(rows)
             let roleId;
             let managerId;
             roleId = rows[0].role_id;
